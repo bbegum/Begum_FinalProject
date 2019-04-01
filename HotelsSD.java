@@ -11,37 +11,66 @@ import org.junit.Assert;
 
 public class HotelsSD {
 
-    private HotelsHomePage hotelsHomePage = new HotelsHomePage();
+     private HotelsHomePage hotelsHomePage = new HotelsHomePage();
     private HotelsPackagesPage hotelsPackagesPage = new HotelsPackagesPage();
     private HotelsResultsPage hotelsResultsPage = new HotelsResultsPage();
 
     @Given("^I am on Hotels.com home page$")
     public void verifyHotelsPage() {
-        hotelsHomePage.clickPackagesandFlights();
+        Assert.assertEquals(SharedSD.getDriver().getTitle(), "Hotels.com - Deals & Discounts for Hotel Reservations from Luxury Hotels to Budget Accommodations");
     }
 
+    @Given("^I am on default search result screen$")
+    public void enterDefaultSetting() throws InterruptedException {
 
+        hotelsHomePage.clickPackagesAndFlights();
+        hotelsPackagesPage.setOriginField("New York, NY (JFK-John F. Kennedy Intl.)");
+        hotelsPackagesPage.setDestinationField("  Orlando, FL (MCO-Orlando Intl.)");
+        hotelsPackagesPage.setDepartureDate("04/17/2019");
+        hotelsPackagesPage.setReturnDate("04/30/2019");
+        hotelsPackagesPage.clickSubmitButton();
+        Thread.sleep(40000);
+    }
 
-   @Given("^I am on default search result screen$")
-       public void entersearchinformation(){
+    @When("^I select property class (.+)")
+    public void enterPropertyClass(String stars) throws InterruptedException {
 
-        hotelsPackagesPage.enterOriginLocation("New York, NY (JFK-John F. Kennedy Intl.");
-        hotelsPackagesPage.enterDestinationLocation("Orlando, Florida");
-        hotelsPackagesPage.enterDepartureDate("04/01/2019");
-        hotelsPackagesPage.enterReturnDate("04/09/2019");
-        hotelsPackagesPage.selectNumberofAdults("Adults");
-        hotelsPackagesPage.selectClass("Economy/Coach");
-        hotelsPackagesPage.clickSearch();
-
-
+        switch (stars) {
+            case "5 stars":
+                hotelsResultsPage.clickOnFiveStars();
+                break;
+            case "4 stars":
+                hotelsResultsPage.clickOnFourStars();
+                break;
+            case "3 stars":
+                hotelsResultsPage.clickOnThreeStars();
+                break;
         }
 
-    @When("^I select property class (.+)$")
-    public void selectPropertyClass(String text){
-        hotelsResultsPage.selectStarClass(text);
+        Thread.sleep(8000);
+    }
 
+    @Then("^I verify system displays only (.+) hotels on search result$")
+    public void verifyStars(String stars) {
+
+        Assert.assertEquals(hotelsResultsPage.getStarNumbers() + " " + "stars", stars);
+    }
+
+    @Then("^I verify system displays all hotels within (.+) miles radius of airport$")
+    public void milesWithinRadius(int miles) {
+    ArrayList<WebElement> hotels = hotelsResultsPage.getlistofHotels(10);
+    for(WebElement temp : hotels){
+        System.out.println("This hotel is within range: " + temp.getText());
+    }
 
     }
+
+    @And("^I verify (.+) Hotel is within radius$")
+    public void checkHiltonRadius(String hotel) {
+
+        System.out.println("This is the " + hotel + " Hotel: " ); hotelsResultsPage.verifyHotelisWithinRange(hotel);
+    }
+
 
 
 
